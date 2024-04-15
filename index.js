@@ -19,14 +19,30 @@ async function main() {
 }
 
 app.post('/register', (req, res) => {
-    res.status(200)
     const user = new User(req.body)
+
     user.save((err, doc) => {
         if (err) return res.json({ success: false, err })
         return res.status(200).json({ success: true })
     })
 })
 
+app.get('/login', (req, res) => {
+    User.findOne({ email: req.body.password }, (err, user) => {
+        if (!user) return res.json({
+            success: false,
+            message: 'There is no such email.'
+        })
+        // if there is such email in db, check the password
+        user.comparePassword(req.body.password, (err, isMatch) => {
+            if (!isMatch) return res.json({ loginSuccess: false, message: "Your password is wrong." })
+            
+            user.generateToken((err, user) => {
+                // start from lecture #12
+            })
+        })
+    })
+})
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
